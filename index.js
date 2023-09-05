@@ -27,12 +27,22 @@ async function run() {
     try {
         // Connect the client to the server	(optional starting in v4.7)
         await client.connect();
+
         // Collections of DB
-        const courses = client.db("buildRight").collection("courses");
+        const coursesCollection = client.db("buildRight").collection("courses");
+        const usersCollection = client.db("buildRight").collection("users");
 
         app.get('/classes', async (req, res) => {
-            const restult = await courses.find().toArray();
+            const restult = await coursesCollection.find().toArray();
             res.send(restult);
+        })
+
+        // user related apis
+        app.post('/users', async (req, res) => {
+            const user = req.body;
+            console.log(user);
+            const result = await usersCollection.insertOne(user);
+            res.send(result);
         })
 
 
