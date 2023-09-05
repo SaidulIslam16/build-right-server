@@ -11,6 +11,7 @@ app.use(express.json());
 
 // ========== MongoDB ================
 
+
 const uri = `mongodb+srv://${process.env.DB_User}:${process.env.DB_PASS}@cluster0.hla3ttg.mongodb.net/?retryWrites=true&w=majority`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -26,6 +27,16 @@ async function run() {
     try {
         // Connect the client to the server	(optional starting in v4.7)
         await client.connect();
+        // Collections of DB
+        const courses = client.db("buildRight").collection("courses");
+
+        app.get('/classes', async (req, res) => {
+            const restult = await courses.find().toArray();
+            res.send(restult);
+        })
+
+
+
         // Send a ping to confirm a successful connection
         await client.db("admin").command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
