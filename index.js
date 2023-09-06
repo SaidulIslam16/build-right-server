@@ -31,6 +31,7 @@ async function run() {
         // Collections of DB
         const coursesCollection = client.db("buildRight").collection("courses");
         const usersCollection = client.db("buildRight").collection("users");
+        const cartCollection = client.db("buildRight").collection("cart");
 
         app.get('/classes', async (req, res) => {
             const restult = await coursesCollection.find().toArray();
@@ -50,8 +51,21 @@ async function run() {
                 const result = await usersCollection.insertOne(user);
                 res.send(result);
             }
+        })
 
+        // cart related APIs
+        app.post('/cart', async (req, res) => {
+            const classInfo = req.body;
+            const result = await cartCollection.insertOne(classInfo);
+            res.send(result);
+        })
 
+        app.get('/cart', async (req, res) => {
+            const email = req.query.email;
+            console.log(email);
+            const query = { email: email };
+            const result = await cartCollection.find(query).toArray();
+            res.send(result);
         })
 
 
