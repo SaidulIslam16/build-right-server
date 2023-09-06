@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config()
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const port = process.env.PORT || 5000;
 const app = express();
 
@@ -56,15 +56,29 @@ async function run() {
         // cart related APIs
         app.post('/cart', async (req, res) => {
             const classInfo = req.body;
-            const result = await cartCollection.insertOne(classInfo);
-            res.send(result);
+
+            const query = { courseId: classInfo.courseId };
+            const existingCourse = await cartCollection.findOne(query);
+            if (existingCourse) {
+                return res.send('Course Already Added');
+            }
+            else {
+                const result = await cartCollection.insertOne(classInfo);
+                res.send(result);
+            }
         })
 
         app.get('/cart', async (req, res) => {
             const email = req.query.email;
-            console.log(email);
             const query = { email: email };
             const result = await cartCollection.find(query).toArray();
+            res.send(result);
+        })
+
+        app.delete('/cart/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: new ObjectId(id) }
+            const result = await cartCollection.deleteOne(filter);
             res.send(result);
         })
 
