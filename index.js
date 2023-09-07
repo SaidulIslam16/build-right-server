@@ -1,6 +1,8 @@
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config()
+const stripe = require("stripe")(process.env.Payment_Key);
+
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const port = process.env.PORT || 5000;
 const app = express();
@@ -80,6 +82,27 @@ async function run() {
             const filter = { _id: new ObjectId(id) }
             const result = await cartCollection.deleteOne(filter);
             res.send(result);
+        })
+
+        // Payment Intent
+
+        app.post('/paymentIntent', async (req, res) => {
+            const { price } = req.body;
+            const amount = price * 100;
+
+            const paymentIntent = await stripe.paymentIntents.create({
+                amount: amount,
+                currency: "usd",
+                payment_method_types: ["card"],
+                // In the latest version of the API, specifying the `automatic_payment_methods` parameter is optional because Stripe enables its functionality by default.
+                // automatic_payment_methods: {
+                //     enabled: true,
+                // },
+            });
+
+            res.send({
+                clientSecret: paymentIntent.client_secret,
+            });
         })
 
 
