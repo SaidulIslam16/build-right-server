@@ -34,6 +34,7 @@ async function run() {
         const coursesCollection = client.db("buildRight").collection("courses");
         const usersCollection = client.db("buildRight").collection("users");
         const cartCollection = client.db("buildRight").collection("cart");
+        const paymentCollection = client.db("buildRight").collection("payments");
 
         app.get('/classes', async (req, res) => {
             const restult = await coursesCollection.find().toArray();
@@ -89,7 +90,7 @@ async function run() {
         app.post('/paymentIntent', async (req, res) => {
             const { price } = req.body;
             const amount = parseInt(price * 100);
-            console.log(amount);
+            // console.log(amount);
 
             const paymentIntent = await stripe.paymentIntents.create({
                 amount: amount,
@@ -104,6 +105,15 @@ async function run() {
             res.send({
                 clientSecret: paymentIntent.client_secret,
             });
+        })
+
+        // payment related API calls
+        app.post('/payments', async (req, res) => {
+            const { payment } = req.body;
+            const result = await paymentCollection.insertOne(payment);
+            const query = { _id: new ObjectId(payment.productId) };
+            const deleteResult = await cartCollection.deleteOne(query);
+            res.send({ result, deleteResult });
         })
 
 
